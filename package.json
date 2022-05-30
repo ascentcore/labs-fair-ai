@@ -1,0 +1,22 @@
+{
+  "name": "tensorflowjs-classify-mnist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "author": "",
+  "dependencies": {
+    "@tensorflow/tfjs": "^1.5.2",
+    "@tensorflow/tfjs-vis": "^1.4.0",
+    "numjs": "^0.16.1"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.18.0",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  }
+}

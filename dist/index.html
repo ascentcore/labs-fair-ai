@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+
+  <head>
+    <title>Tensorflow JS MNIST Classifier</title>
+    <style>
+      .text {
+        position: fixed;
+        left: 230px;
+        top: 90px;
+        font-size: 20px;
+        font-family: monospace;
+      }
+
+      .button {
+        background-color: #4caf50;
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+
+      .button2 {
+        background-color: #008cba;
+      }
+      .button3 {
+        background-color: #f44336;
+      }
+      .button4 {
+        background-color: #A0522D;
+      }
+    </style>
+  </head>
+
+  <body>
+    <script src="file:///Users/sarapopa/Desktop/pixel-display-master/pixeldisplay.min.js"></script>
+    <script src="main.js"></script>
+    <canvas
+      id="canvas"
+      width="200"
+      height="200"
+      style="border: 1px solid"></canvas>
+    <span id="pred" class="text"></span>
+    <div style="position: fixed; top: 220px; left: 10px">
+      <button class="button" onClick="startTraining()">Start Training</button>
+    </div>
+    <div style="position: fixed; top: 255px; left: 10px">
+      <button class="button button2" onClick="classifyDrawing()">Classify Drawing</button>
+    </div>
+    <div style="position: fixed; top: 290px; left: 10px">
+      <button class="button button3" onClick="clearCanvas()">Clear Drawing</button>
+    </div>
+    <div style="position: fixed; top: 325px; left: 10px">
+      <button class="button button4" onClick="generateCounterfactual()">Generate Counterfactual</button>
+    </div>
+  </body>
+  
+</html>
+
