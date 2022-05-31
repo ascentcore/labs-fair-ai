@@ -4,59 +4,111 @@
   <head>
     <title>Tensorflow JS MNIST Classifier</title>
     <style>
-      .text {
+      .box-container {
+        width: 200px;
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
         position: fixed;
-        left: 230px;
-        top: 90px;
-        font-size: 20px;
-        font-family: monospace;
+        top: 220px;
+        box-shadow: 2px 0px 3px lightgray;
       }
 
       .button {
         background-color: #4caf50;
         border: none;
         color: white;
-        padding: 8px 16px;
         text-align: center;
         text-decoration: none;
         display: inline-block;
         font-size: 12px;
-        margin: 4px 2px;
+        padding: 8px;
         cursor: pointer;
+        justify-self: flex-end;
+        margin-top: 10px;
       }
 
-      .button2 {
+      .button:hover {
+        transform: scale(1.1);
+      }
+
+      .button-blue {
         background-color: #008cba;
       }
-      .button3 {
+
+      .button-red {
         background-color: #f44336;
       }
-      .button4 {
+      
+      .button-brown {
         background-color: #A0522D;
+      }
+      
+      .input {
+        padding: 6px 4px;
+        width: 8px;
+        height: 5px;
+        border: 1px solid #A0522D;
+      }
+
+      .text {
+        font-family: monospace;
+        margin-left: 2px;
+      }
+
+      .box {
+        width: 100%;
+        height: 100px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        padding: 10px;
+        box-shadow: 2px 2px 3px lightgrey;
+      }
+
+      .target {
+        margin-top: 10px; 
+        margin-left: 2px;
       }
     </style>
   </head>
 
   <body>
-    <script src="file:///Users/sarapopa/Desktop/pixel-display-master/pixeldisplay.min.js"></script>
     <script src="main.js"></script>
     <canvas
       id="canvas"
       width="200"
       height="200"
-      style="border: 1px solid"></canvas>
-    <span id="pred" class="text"></span>
-    <div style="position: fixed; top: 220px; left: 10px">
-      <button class="button" onClick="startTraining()">Start Training</button>
-    </div>
-    <div style="position: fixed; top: 255px; left: 10px">
-      <button class="button button2" onClick="classifyDrawing()">Classify Drawing</button>
-    </div>
-    <div style="position: fixed; top: 290px; left: 10px">
-      <button class="button button3" onClick="clearCanvas()">Clear Drawing</button>
-    </div>
-    <div style="position: fixed; top: 325px; left: 10px">
-      <button class="button button4" onClick="generateCounterfactual()">Generate Counterfactual</button>
+      style="border: 1px solid">
+    </canvas>
+    <div class="box-container">
+      <div class="box">
+        <span class="text">1. Train the model</span>
+        <button class="button" onClick="startTraining()">Start Training</button>
+      </div>
+      <div class="box">
+        <span class="text">2. See model prediction</span>
+        <button class="button button-blue" onClick="classifyDrawing()">Classify Drawing</button>
+      </div>
+      <div class="box">
+        <span class="text">3. Reset Canvas</span>
+        <button class="button button-red" onClick="clearCanvas()">Clear Drawing</button>
+      </div>
+      <div class="box">
+        <span class="text">4. Counterfactual</span>
+        <div class="target">
+          <span class="text">Target Class: </span>
+          <input id="target-class" class="input"></input>
+        </div>
+        <button class="button button-brown" onClick="generateCounterfactual()">Generate Counterfactual</button>
+      </div>
+      <div class="box">
+        <span class="text">5. Load Model</span>
+        <button class="button button-red" onClick="loadSavedModel()">Load Model</button>
+      </div>
     </div>
   </body>
   

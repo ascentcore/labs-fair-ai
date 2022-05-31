@@ -181,6 +181,14 @@ async function showAccuracy(model, data) {
 }
 
 async function classifyDrawing() {
+    
+    if (document.getElementById('data-image')) {
+        document.getElementById('data-image').remove()
+    }
+    if (document.getElementById('data-predict')) {
+        document.getElementById('data-predict').remove()
+    }
+
     let data = canvas.getCanvasData()
     const xs = tf.tensor2d(data, [1, 200 * 200])
     const r = xs.reshape([200, 200, 1])
@@ -189,15 +197,8 @@ async function classifyDrawing() {
     const values = rsmall.dataSync();
     const arr = Array.from(values);
 
-    if (document.getElementById('data-image')) {
-        document.getElementById('data-image').remove()
-    }
-    if (document.getElementById('data-predict')) {
-        document.getElementById('data-predict').remove()
-    }
-
     const surface2 =
-        tfvis.visor().surface({ name: 'Classify Data', tab: 'Classify Data' })
+        tfvis.visor().surface({ name: 'Model Prediction', tab: 'Classify Data' })
     const canvas2 = document.createElement('canvas')
     canvas2.width = 28
     canvas2.height = 28    
@@ -220,13 +221,27 @@ async function classifyDrawing() {
     span.style.fontFamily = 'monospace'
     
     let pred = doRealPrediction(model, data, 1)
-    let result = pred.dataSync();
+    let result = pred.dataSync()
     
     span.textContent = ` => Neural Network Prediction: ${result}`
     surface2.drawArea.appendChild(span)
 }
 
 async function generateCounterfactual() {
+    
+    if (document.getElementById('counterfactual-image')) {
+        document.getElementById('counterfactual-image').remove()
+    }
+    if (document.getElementById('counterfactual-image-2')) {
+        document.getElementById('counterfactual-image-2').remove()
+    }
+    if (document.getElementById('counterfactual-predict-1')) {
+        document.getElementById('counterfactual-predict-1').remove()
+    }
+    if (document.getElementById('counterfactual-predict-2')) {
+        document.getElementById('counterfactual-predict-2').remove()
+    }
+
     let data = canvas.getCanvasData()
     const xs = tf.tensor2d(data, [1, 200 * 200])
     const r = xs.reshape([200, 200, 1])
@@ -235,7 +250,7 @@ async function generateCounterfactual() {
 
     const ref = Array.from(values)
     const ref_outcome = 0
-    const target_class = 8
+    const target_class = document.getElementById('target-class').value == '' ? null : parseInt(document.getElementById('target-class').value)
 
     const iterations = 300
     const problem = new OptimizationProblem(ref_outcome, ref, target_class)
@@ -256,17 +271,11 @@ async function generateCounterfactual() {
     console.log('best_individual', best_individual)
     console.log('Objectives: ', best_individual.objectives)
     console.log('Constraints: ', best_individual.constraints)
+    console.log('Fitness: ', best_individual.fitness)
     console.log('Ref Outcome / New Outcome: ', ref_outcome + ' / ' + res_array[0])
 
-    if (document.getElementById('counterfactual-image')) {
-        document.getElementById('counterfactual-image').remove()
-    }
-    if (document.getElementById('counterfactual-image-2')) {
-        document.getElementById('counterfactual-image-2').remove()
-    }
-
     const surface3 =
-        tfvis.visor().surface({ name: 'Counterfactual', tab: 'Counterfactual' })
+        tfvis.visor().surface({ name: 'Generated Counterfactual', tab: 'Counterfactual' })
     const canvas3 = document.createElement('canvas')
     canvas3.width = 28
     canvas3.height = 28
@@ -280,7 +289,6 @@ async function generateCounterfactual() {
     img.style.height = '200px';
     img.style.marginRight = '10px';
     surface3.drawArea.appendChild(img)
-
 
     const best_individual_xs = tf.tensor2d(best_individual.genes, [1, 28 * 28])
     const best_individual_r = best_individual_xs.reshape([28, 28, 1])
@@ -297,6 +305,33 @@ async function generateCounterfactual() {
     img2.style.width = '200px'
     img2.style.height = '200px';
     surface3.drawArea.appendChild(img2)
+
+    const span = document.createElement('span')
+    span.setAttribute('id', 'counterfactual-predict-1')
+    span.style.display = 'block'
+    span.style.marginTop = '10px'
+    span.style.fontSize = '15px'
+    span.style.fontFamily = 'monospace'
+    
+    span.textContent = ` Ref Outcome / New Outcome: ${ref_outcome} / ${res_array[0]}`
+    surface3.drawArea.appendChild(span)
+
+    const span2 = document.createElement('span')
+    span2.setAttribute('id', 'counterfactual-predict-2')
+    span2.style.display = 'block'
+    span2.style.marginTop = '10px'
+    span2.style.fontSize = '15px'
+    span2.style.fontFamily = 'monospace'
+    
+    span2.textContent = ` No of values changed: ${parseInt(best_individual.fitness)}`
+    surface3.drawArea.appendChild(span2)
+}
+
+async function loadSavedModel() {
+    console.log('1')
+    model = await tf.loadLayersModel('src/model/mnist-model.weights.bin');
+    console.log('2')
+    await showAccuracy(model, data)
 }
 
 document.addEventListener('DOMContentLoaded', run)
@@ -304,3 +339,4 @@ window.startTraining = startTraining
 window.classifyDrawing = classifyDrawing
 window.clearCanvas = canvas.clearCanvas
 window.generateCounterfactual = generateCounterfactual
+window.loadSavedModel = loadSavedModel
