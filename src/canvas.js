@@ -1,4 +1,4 @@
-function canvasComponent() {
+function canvasComponent(classify) {
     var canvas = document.getElementById('canvas')
     canvas.style.position = 'fixed'
 
@@ -12,6 +12,7 @@ function canvasComponent() {
 
     document.addEventListener('mousemove', draw)
     document.addEventListener('mousedown', setPosition)
+    document.addEventListener('mouseup', classify)
     document.addEventListener('mouseenter', setPosition)
 
     function setPosition(e) {

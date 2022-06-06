@@ -9,6 +9,7 @@ import { GA } from './heuristic/ga.js'
 
 const data = new MnistData()
 let model = tf.sequential()
+let ref_outcome = -1;
 
 async function showExamples(data) {
     const surface =
@@ -39,33 +40,46 @@ function getModel() {
     const IMAGE_HEIGHT = 28
     const IMAGE_CHANNELS = 1
 
-    model.add(tf.layers.conv2d({
-        inputShape: [IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS],
-        kernelSize: 5,
-        filters: 8,
-        strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling'
+    model.add(tf.layers.flatten({inputShape: [IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS]}))
+
+    model.add(tf.layers.dense({
+        units: 128,
+        activation: 'relu'
+    }))
+   
+
+    model.add(tf.layers.dense({
+        units: 32,
+        activation: 'relu'
     }))
 
-    model.add(tf.layers.maxPooling2d({ poolSize: [2, 2], strides: [2, 2] }))
+    // model.add(tf.layers.conv2d({
+    //     inputShape: [IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS],
+    //     kernelSize: 5,
+    //     filters: 8,
+    //     strides: 1,
+    //     activation: 'relu',
+    //     kernelInitializer: 'varianceScaling'
+    // }))
 
-    model.add(tf.layers.conv2d({
-        kernelSize: 5,
-        filters: 16,
-        strides: 1,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling'
-    }))
+    // model.add(tf.layers.maxPooling2d({ poolSize: [2, 2], strides: [2, 2] }))
 
-    model.add(tf.layers.maxPooling2d({ poolSize: [2, 2], strides: [2, 2] }))
+    // model.add(tf.layers.conv2d({
+    //     kernelSize: 5,
+    //     filters: 16,
+    //     strides: 1,
+    //     activation: 'relu',
+    //     kernelInitializer: 'varianceScaling'
+    // }))
 
-    model.add(tf.layers.flatten())
+    // model.add(tf.layers.maxPooling2d({ poolSize: [2, 2], strides: [2, 2] }))
+
+    // model.add(tf.layers.flatten())
 
     const NUM_OUTPUT_CLASSES = 10
     model.add(tf.layers.dense({
         units: NUM_OUTPUT_CLASSES,
-        kernelInitializer: 'varianceScaling',
+        // kernelInitializer: 'varianceScaling',
         activation: 'sigmoid'
     }))
 
@@ -118,7 +132,7 @@ async function train(model, data) {
 async function run() {
     await data.load()
     await showExamples(data)
-    canvas.canvasComponent()
+    canvas.canvasComponent(classifyDrawing)
 }
 
 async function startTraining() {
@@ -222,8 +236,11 @@ async function classifyDrawing() {
     span.style.fontSize = '15px'
     span.style.fontFamily = 'monospace'
     
-    let pred = doRealPrediction(model, data, 1)
+    let pred = await doRealPrediction(model, data, 1)
     let result = pred.dataSync()
+
+    ref_outcome = result[0]
+
     
     span.textContent = ` => Neural Network Prediction: ${result}`
     surface2.drawArea.appendChild(span)
@@ -250,14 +267,15 @@ async function generateCounterfactual() {
     const rsmall = tf.image.resizeBilinear(r, [28, 28])
     const values = rsmall.dataSync()
 
+    classifyDrawing()
+
     const ref = Array.from(values)
-    const ref_outcome = 0
     const target_class = document.getElementById('target-class').value == '' ? null : parseInt(document.getElementById('target-class').value)
 
     const iterations = 3000
     const problem = new OptimizationProblem(ref_outcome, ref, target_class)    
 
-    const algorithm = new GA(problem, doPredictions, 100, 90, 
+    const algorithm = new GA(problem, doPredictions, 300, 290, 
         { single_crossover: true }, 
         { single_mutation: false, mutation_probability: 0.0005 })
 
