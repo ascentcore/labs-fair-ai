@@ -275,9 +275,9 @@ async function generateCounterfactual() {
     const iterations = 3000
     const problem = new OptimizationProblem(ref_outcome, ref, target_class)    
 
-    const algorithm = new GA(problem, doPredictions, 300, 290, 
+    const algorithm = new GA(problem, doPredictions, 100, 90, 
         { single_crossover: true }, 
-        { single_mutation: false, mutation_probability: 0.0005 })
+        { single_mutation: false, mutation_probability: 0.005 })
 
     // Pollute the reference image with random noise
     // 
@@ -346,11 +346,11 @@ async function generateCounterfactual() {
             let res = preds.dataSync()
             let res_array = Array.from(res)
 
-            console.log('best_individual', best_individual)
-            console.log('Objectives: ', best_individual.objectives)
-            console.log('Constraints: ', best_individual.constraints)
-            console.log('Fitness: ', best_individual.fitness)
-            console.log('Ref Outcome / New Outcome: ', ref_outcome + ' / ' + res_array[0])
+            // console.log('best_individual', best_individual)
+            // console.log('Objectives: ', best_individual.objectives)
+            // console.log('Constraints: ', best_individual.constraints)
+            // console.log('Fitness: ', best_individual.fitness)
+            // console.log('Ref Outcome / New Outcome: ', ref_outcome + ' / ' + res_array[0])
 
        
             await tf.browser.toPixels(rsmall, canvas3)
@@ -364,9 +364,10 @@ async function generateCounterfactual() {
             await tf.browser.toPixels(best_individual_image, canvas4)
             img2.src = canvas4.toDataURL();
 
-            span.textContent = ` Ref Outcome / New Outcome: ${ref_outcome} / ${res_array[0]}`
-            span2.textContent = ` No of values changed: ${parseInt(best_individual.fitness)}`
-            
+            span.innerHTML = `
+                Ref Outcome / New Outcome: ${ref_outcome} / ${res_array[0]}<br>
+                No of values changed: ${parseInt(best_individual.fitness)}<br>
+                Progress: ${iteration < iterations ? parseInt(iteration * 100/ iterations)+'%': 'Finished'}<br>`            
         }
     })
 }
@@ -384,4 +385,4 @@ window.generateCounterfactual = generateCounterfactual
 window.loadSavedModel = loadSavedModel
 
 
-// loadSavedModel()
+loadSavedModel()
