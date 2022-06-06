@@ -66,7 +66,7 @@ function getModel() {
     model.add(tf.layers.dense({
         units: NUM_OUTPUT_CLASSES,
         kernelInitializer: 'varianceScaling',
-        activation: 'softmax'
+        activation: 'sigmoid'
     }))
 
     const optimizer = tf.train.adam()
@@ -109,7 +109,7 @@ async function train(model, data) {
     return model.fit(trainXs, trainYs, {
         batchSize: BATCH_SIZE,
         validationData: [testXs, testYs],
-        epochs: 10,
+        epochs: 30,
         shuffle: true,
         callbacks: fitCallbacks
     })
@@ -127,6 +127,7 @@ async function startTraining() {
 
     await train(model, data)
     await showAccuracy(model, data)
+    await model.save('downloads://mnist-model');
 }
 
 const classNames = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine']
@@ -137,10 +138,12 @@ function doPrediction(model, data, testDataSize = 500) {
     const testData = data.nextTestBatch(testDataSize)
     const testxs = testData.xs.reshape([testDataSize, IMAGE_WIDTH, IMAGE_HEIGHT, 1])
     const labels = testData.labels.argMax([-1])
-    const preds = model.predict(testxs).argMax([-1])
+    const preds = model.predict(testxs)
+        
+    const res = preds.argMax([-1])
 
     testxs.dispose()
-    return [preds, labels]
+    return [res, labels, preds]
 }
 
 function doRealPrediction(model, data) {
@@ -160,15 +163,14 @@ function doPredictions(data) {
     return doPredictions2(model, data)
 }
 
-function doPredictions2(model, data) {
+async function  doPredictions2(model, data) {
     const tf_data = tf.tensor2d(data, [data.length, 28 * 28])
     const tf_data_2 = tf_data.reshape([data.length, 28, 28, 1])
-    let preds = model.predict(tf_data_2).argMax([-1])
-    let res = preds.dataSync()
-    let res_array = Array.from(res)
-    let result = res_array.map((r) => [r])
-
-    return result
+    let preds = model.predict(tf_data_2); //.argMax([-1])
+    // let res = preds.dataSync()
+    // let res_array = Array.from(res)
+    // let result = res_array.map((r) => [r])
+    return  preds.arraySync()
 }
 
 async function showAccuracy(model, data) {
@@ -252,60 +254,48 @@ async function generateCounterfactual() {
     const ref_outcome = 0
     const target_class = document.getElementById('target-class').value == '' ? null : parseInt(document.getElementById('target-class').value)
 
-    const iterations = 300
-    const problem = new OptimizationProblem(ref_outcome, ref, target_class)
+    const iterations = 3000
+    const problem = new OptimizationProblem(ref_outcome, ref, target_class)    
 
-    const algorithm = new GA(problem, doPredictions, 100, 90, { single_crossover: false }, { single_mutation: false, mutation_probability: 0.02 })
-    
-    algorithm.run_optimization(iterations)
+    const algorithm = new GA(problem, doPredictions, 100, 90, 
+        { single_crossover: true }, 
+        { single_mutation: false, mutation_probability: 0.0005 })
 
-    const best_individual = algorithm.population[0]
-    const best_individual_genes = best_individual.genes
+    // Pollute the reference image with random noise
+    // 
+    // algorithm.population.forEach(individual => {
+    //     individual.genes.forEach((gene, index) => {
+    //         individual.genes[index] = Math.random() <0.4 ? Math.random() : ref[index]
+    //     })
+    // })
 
-    const tf_data = tf.tensor2d([best_individual_genes], [[best_individual_genes].length, 28 * 28])
-    const tf_data_2 = tf_data.reshape([[best_individual_genes].length, 28, 28, 1])
-    let preds = model.predict(tf_data_2).argMax([-1])
-    let res = preds.dataSync()
-    let res_array = Array.from(res)
-
-    console.log('best_individual', best_individual)
-    console.log('Objectives: ', best_individual.objectives)
-    console.log('Constraints: ', best_individual.constraints)
-    console.log('Fitness: ', best_individual.fitness)
-    console.log('Ref Outcome / New Outcome: ', ref_outcome + ' / ' + res_array[0])
-
-    const surface3 =
-        tfvis.visor().surface({ name: 'Generated Counterfactual', tab: 'Counterfactual' })
-    const canvas3 = document.createElement('canvas')
-    canvas3.width = 28
-    canvas3.height = 28
-    await tf.browser.toPixels(rsmall, canvas3)
+    const surface3 = tfvis.visor().surface({ name: 'Generated Counterfactual', tab: 'Counterfactual' })
 
     const img = new Image();
-    img.src = canvas3.toDataURL();
-    document.body.appendChild(img);
     img.setAttribute('id', 'counterfactual-image')
     img.style.width = '200px'
     img.style.height = '200px';
     img.style.marginRight = '10px';
     surface3.drawArea.appendChild(img)
+    // document.body.appendChild(img);
 
-    const best_individual_xs = tf.tensor2d(best_individual.genes, [1, 28 * 28])
-    const best_individual_r = best_individual_xs.reshape([28, 28, 1])
-    const best_individual_image = tf.image.resizeBilinear(best_individual_r, [28, 28])
-    const canvas4 = document.createElement('canvas')
-    canvas4.width = 28
-    canvas4.height = 28
-    await tf.browser.toPixels(best_individual_image, canvas4)
 
     const img2 = new Image();
-    img2.src = canvas4.toDataURL();
-    document.body.appendChild(img2);
     img2.setAttribute('id', 'counterfactual-image-2')
     img2.style.width = '200px'
     img2.style.height = '200px';
     surface3.drawArea.appendChild(img2)
+    // document.body.appendChild(img2);
 
+    const canvas3 = document.createElement('canvas')
+    canvas3.width = 28
+    canvas3.height = 28
+
+    const canvas4 = document.createElement('canvas')
+    canvas4.width = 28
+    canvas4.height = 28
+
+       
     const span = document.createElement('span')
     span.setAttribute('id', 'counterfactual-predict-1')
     span.style.display = 'block'
@@ -313,7 +303,7 @@ async function generateCounterfactual() {
     span.style.fontSize = '15px'
     span.style.fontFamily = 'monospace'
     
-    span.textContent = ` Ref Outcome / New Outcome: ${ref_outcome} / ${res_array[0]}`
+    
     surface3.drawArea.appendChild(span)
 
     const span2 = document.createElement('span')
@@ -323,14 +313,48 @@ async function generateCounterfactual() {
     span2.style.fontSize = '15px'
     span2.style.fontFamily = 'monospace'
     
-    span2.textContent = ` No of values changed: ${parseInt(best_individual.fitness)}`
     surface3.drawArea.appendChild(span2)
+
+    algorithm.run_optimization(iterations,async (iteration) => {
+
+        if (!iteration || iteration % 20 == 0) {
+
+            const best_individual = algorithm.population[0]
+            const best_individual_genes = best_individual.genes
+
+            const tf_data = tf.tensor2d([best_individual_genes], [[best_individual_genes].length, 28 * 28])
+            const tf_data_2 = tf_data.reshape([[best_individual_genes].length, 28, 28, 1])
+            let preds = model.predict(tf_data_2).argMax([-1])
+            let res = preds.dataSync()
+            let res_array = Array.from(res)
+
+            console.log('best_individual', best_individual)
+            console.log('Objectives: ', best_individual.objectives)
+            console.log('Constraints: ', best_individual.constraints)
+            console.log('Fitness: ', best_individual.fitness)
+            console.log('Ref Outcome / New Outcome: ', ref_outcome + ' / ' + res_array[0])
+
+       
+            await tf.browser.toPixels(rsmall, canvas3)
+            img.src = canvas3.toDataURL();
+          
+
+            const best_individual_xs = tf.tensor2d(best_individual.genes, [1, 28 * 28])
+            const best_individual_r = best_individual_xs.reshape([28, 28, 1])
+            const best_individual_image = tf.image.resizeBilinear(best_individual_r, [28, 28])
+         
+            await tf.browser.toPixels(best_individual_image, canvas4)
+            img2.src = canvas4.toDataURL();
+
+            span.textContent = ` Ref Outcome / New Outcome: ${ref_outcome} / ${res_array[0]}`
+            span2.textContent = ` No of values changed: ${parseInt(best_individual.fitness)}`
+            
+        }
+    })
 }
 
 async function loadSavedModel() {
-    console.log('1')
-    model = await tf.loadLayersModel('src/model/mnist-model.weights.bin');
-    console.log('2')
+    model = await tf.loadLayersModel('model/mnist-model.json');
     await showAccuracy(model, data)
 }
 
@@ -340,3 +364,6 @@ window.classifyDrawing = classifyDrawing
 window.clearCanvas = canvas.clearCanvas
 window.generateCounterfactual = generateCounterfactual
 window.loadSavedModel = loadSavedModel
+
+
+// loadSavedModel()

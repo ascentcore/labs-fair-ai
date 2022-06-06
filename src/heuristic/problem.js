@@ -14,7 +14,7 @@ export class OptimizationProblem {
         return arr1.map(function (num, idx) { return num - arr2[idx] }) 
     }
     diffBool(arr1, arr2) {
-        return arr1.map(function (num, idx) { return num != arr2[idx] }) 
+        return arr1.map(function (num, idx) { return parseInt(num*100) != parseInt(arr2[idx]*100) }) 
     }
     sum(arr) {
         return arr.reduce((a, b)=> a + b)
@@ -26,12 +26,14 @@ export class OptimizationProblem {
     evaluate(x, outcome) {
         let std_val = this.abs(this.diffNumber(x, this.domain_reference))
         if (this.target_class != null) { 
-            let obj = this.sum(std_val)
-            let cons = (outcome[0] != this.target_class) ? this.sum(this.diffBool(x, this.domain_reference)) : 0
-            return [obj, cons * 1000]
+            let cons = 1/outcome[this.target_class]
+            if (Math.floor(cons) === 1) {
+                cons = 0;
+            }
+            return [this.sum(std_val), cons * 10000]
         }
-        else {
-            return [this.sum(std_val), (outcome[0] == this.ref_class) ? this.sum(this.diffBool(x, this.domain_reference)) * 1000 : 0]
+        else {            
+            return [this.sum(std_val), (outcome[0] === this.ref_class) ? this.sum(this.diffBool(x, this.domain_reference)) * 1000 : 0]
         }
     }
 }

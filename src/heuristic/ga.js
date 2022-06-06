@@ -48,7 +48,7 @@ export class GA {
         this.calculate_obj_func()
     }
 
-    calculate_obj_func() {
+    async calculate_obj_func() {
         let predict_indices = []
         let predict_values = []
 
@@ -59,18 +59,30 @@ export class GA {
             }
         })
 
-        let data = this.predict(predict_values)
+        let data = await this.predict(predict_values)
         predict_indices.forEach((ind_index, i) => {
             let individual = this.population[ind_index]
             individual.set_evaluation_results(this.problem.evaluate(individual.genes, data[i]))
         })
     }
 
-    run_optimization(count) {
-        for (let i = 0; i < count; i++) {
+    run_optimization(count, onComplete) {
+        this.onComplete = onComplete
+        this.maxGenerations = count      
+        this.iterate()
+    }
+
+    iterate() {
+        if (this.generations < this.maxGenerations) {            
             this.tick()
+            this.population.sort((a, b) => a.fitness - b.fitness)            
+            this.onComplete(this.generations)
+            setTimeout(() => {
+                this.iterate();
+            })            
+        } else {
+            this.onComplete()
         }
-        this.population.sort((a, b) => a.fitness - b.fitness)
     }
 
     my_range(start, end, multiply = 1) {
@@ -112,7 +124,7 @@ export class GA {
     }
 
     tick() {
-        this.generations = this.generations + 1
+        this.generations++
         this.population.sort((a, b) => a.fitness - b.fitness)
 
         let rank = []
@@ -122,7 +134,6 @@ export class GA {
         }
 
         let selected_parents = []
-
         let parent1 = null
 
         while (selected_parents.length < this.replace_count) {
@@ -155,16 +166,28 @@ export class GA {
             let off_1_genes = []
             let off_2_genes = []
 
+            
             let split_location = parseInt(Math.random() * this.problem.n_var)
+            
             for (let g_index = 0; g_index < this.problem.n_var; g_index ++) {
-                if ((this.crossover_settings.single_crossover == false) && (Math.random() < 0.5)) {
-                    off_1_genes.push(parent1.genes[g_index])
-                    off_2_genes.push(parent2.genes[g_index])
-                }
-                else {
-                    off_1_genes.push(parent2.genes[g_index])
-                    off_2_genes.push(parent1.genes[g_index])
-                }
+                if (this.crossover_settings.single_crossover) {
+                    if (g_index < split_location) {
+                        off_1_genes.push(parent1.genes[g_index])
+                        off_2_genes.push(parent2.genes[g_index])
+                    }
+                    else {
+                        off_1_genes.push(parent2.genes[g_index])
+                        off_2_genes.push(parent1.genes[g_index])
+                    }
+                } else {
+                    if (Math.random() < 0.5) {
+                        off_1_genes.push(parent1.genes[g_index])
+                        off_2_genes.push(parent2.genes[g_index])
+                    } else {
+                        off_1_genes.push(parent2.genes[g_index])
+                        off_2_genes.push(parent1.genes[g_index])
+                    }
+                }                            
             }
             
             offspring_genes.push(this.mutate_genes(off_1_genes))
