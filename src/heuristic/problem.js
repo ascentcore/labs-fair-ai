@@ -13,7 +13,7 @@ export class OptimizationProblem {
         return arr1.map(function (num, idx) { return num - arr2[idx] }) 
     }
     diffBool(arr1, arr2) {
-        return arr1.map(function (num, idx) { return parseInt(num*10) != parseInt(arr2[idx]*10) }) 
+        return arr1.map(function (num, idx) { return parseInt(num*1000) != parseInt(arr2[idx]*1000) }) 
     }
     sum(arr) {
         return arr.reduce((a, b)=> a + b)
