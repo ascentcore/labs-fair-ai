@@ -1,18 +1,22 @@
-function canvasComponent(classify) {
+function canvasComponent(dataSample) {
     var canvas = document.getElementById('canvas')
     canvas.style.position = 'fixed'
 
     var ctx = canvas.getContext('2d')
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let imgData = ctx.createImageData(200, 200)
+    let data = imgData.data
+
+    for (let i = 0; i < 200 * 200 * 4; i++) {
+        data[i] = dataSample[i]
+    }
+    ctx.putImageData(imgData, 0, 0)
 
     let rect = canvas.getBoundingClientRect()
     var pos = { x: rect.x, y: rect.y }
 
     document.addEventListener('mousemove', draw)
     document.addEventListener('mousedown', setPosition)
-    document.addEventListener('mouseup', classify)
     document.addEventListener('mouseenter', setPosition)
 
     function setPosition(e) {
