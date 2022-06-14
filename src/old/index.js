@@ -1,12 +1,10 @@
-import { MnistData } from './data.js'
+import { MnistData } from '../data.js'
 import * as tf from '@tensorflow/tfjs'
 import * as tfvis from '@tensorflow/tfjs-vis'
-import canvas from './canvas'
-import { dtypes } from 'numjs'
-import { float32 } from 'numjs'
-import { OptimizationProblem } from './heuristic/problem.js'
-import { GA } from './heuristic/ga.js'
-import dataJSON from './data-samples/zero-sample.json'
+import canvas from '../canvas'
+import { OptimizationProblem } from '../heuristic/problem.js'
+import { GA } from '../heuristic/ga.js'
+import dataJSON from '../data-samples/fifth-sample.json'
 
 const data = new MnistData()
 const classNames = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine']
@@ -345,3 +343,6 @@ window.classifyDrawing = classifyDrawing
 window.clearCanvas = canvas.clearCanvas
 window.generateCounterfactual = generateCounterfactual
 window.loadSavedModel = loadSavedModel
+
+
+loadSavedModel()
