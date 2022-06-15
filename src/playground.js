@@ -3,24 +3,29 @@ import { prepareCounterfactual } from './counterfactual'
 import { prepareInput } from './input'
 
 export default async function preparePlayground(options) {
-    const { selector, allowEdit, dataSample, forcePredict, loadModel, title } = options
-    // const model = await tf.loadLayersModel(`${loadModel || 'model-strong'}/mnist-model.json`)
-
-    const model = await tf.loadLayersModel(`https://raw.githubusercontent.com/ascentcore/labs-fair-ai/main/assets/${loadModel || 'model-strong'}/mnist-model.json`)
-
-    const documentStyles = document.querySelector('#playground-styles')
-    if (!documentStyles) {
-        const style = document.createElement('style')
-        style.id = 'playground-styles'
-
-        style.innerHTML = styles
-
-        document.head.appendChild(style)
-    }
+    const { selector, allowEdit, dataSample, forcePredict, loadModel, title } =
+        options
 
     const container = document.querySelector(selector)
 
-    container.innerHTML = `
+    if (container) {
+        const model = await tf.loadLayersModel(
+            `https://raw.githubusercontent.com/ascentcore/labs-fair-ai/main/assets/${
+                loadModel || 'model-strong'
+            }/mnist-model.json`
+        )
+
+        const documentStyles = document.querySelector('#playground-styles')
+        if (!documentStyles) {
+            const style = document.createElement('style')
+            style.id = 'playground-styles'
+
+            style.innerHTML = styles
+
+            document.head.appendChild(style)
+        }
+
+        container.innerHTML = `
       <div class="playground-wrapper">
         <h3>${title}</h3>
         <div class="playground-container">
@@ -59,76 +64,83 @@ export default async function preparePlayground(options) {
       </div>
     `
 
-    const canvasContainer = container.querySelector('.canvas-container.input')
-    const counterfactualContainer = container.querySelector(
-        '.canvas-container.counterfactual'
-    )
-    const predictionContainer = container.querySelector('.prediction')
-    const select = container.querySelector('select')
+        const canvasContainer = container.querySelector(
+            '.canvas-container.input'
+        )
+        const counterfactualContainer = container.querySelector(
+            '.canvas-container.counterfactual'
+        )
+        const predictionContainer = container.querySelector('.prediction')
+        const select = container.querySelector('select')
 
-    const inputCanvas = prepareInput({
-        container: canvasContainer,
-        allowEdit,
-        onDraw,
-        dataSample,
-    })
+        const inputCanvas = prepareInput({
+            container: canvasContainer,
+            allowEdit,
+            onDraw,
+            dataSample,
+        })
 
-    if (!allowEdit) {
-      container.querySelector('.select-container').remove()
-      container.querySelector('.clear-canvas').remove()
-    }
-
-    const counterfactual = prepareCounterfactual({
-        container: counterfactualContainer,
-        input: canvasContainer,
-        select,
-        model,
-        forcePredict
-    })
-
-    function predict(canvas) {
-        var ctx = canvas.getContext('2d')
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-        let datasetBytesView = []
-        for (let j = 0; j < imageData.data.length / 4; j++) {
-            datasetBytesView[j] = imageData.data[j * 4] / 255
-        }
-        const data = datasetBytesView
-        const xs = tf.tensor2d(data, [1, 200 * 200])
-        const r = xs.reshape([1, 200, 200, 1])
-        const rsmall = tf.image.resizeBilinear(r, [28, 28])
-        let probs = model.predict(rsmall)
-        const preds = probs.argMax([-1])
-        probs = probs.dataSync()
-
-        let result = preds.dataSync()
-
-        canvasContainer.predictData = {
-            result: result[0],
-            data: rsmall.dataSync(),
+        if (!allowEdit) {
+            container.querySelector('.select-container').remove()
+            container.querySelector('.clear-canvas').remove()
         }
 
-        xs.dispose()
-        r.dispose()
-        rsmall.dispose()
+        const counterfactual = prepareCounterfactual({
+            container: counterfactualContainer,
+            input: canvasContainer,
+            select,
+            model,
+            forcePredict,
+        })
 
-        predictionContainer.innerHTML = `
+        function predict(canvas) {
+            var ctx = canvas.getContext('2d')
+            const imageData = ctx.getImageData(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            )
+            let datasetBytesView = []
+            for (let j = 0; j < imageData.data.length / 4; j++) {
+                datasetBytesView[j] = imageData.data[j * 4] / 255
+            }
+            const data = datasetBytesView
+            const xs = tf.tensor2d(data, [1, 200 * 200])
+            const r = xs.reshape([1, 200, 200, 1])
+            const rsmall = tf.image.resizeBilinear(r, [28, 28])
+            let probs = model.predict(rsmall)
+            const preds = probs.argMax([-1])
+            probs = probs.dataSync()
+
+            let result = preds.dataSync()
+
+            canvasContainer.predictData = {
+                result: result[0],
+                data: rsmall.dataSync(),
+            }
+
+            xs.dispose()
+            r.dispose()
+            rsmall.dispose()
+
+            predictionContainer.innerHTML = `
           <div>Predicted as: ${result[0]}</div>
         `
-    }
+        }
 
-    function onDraw(canvas) {
-        predict(canvas)
-    }
+        function onDraw(canvas) {
+            predict(canvas)
+        }
 
-    if (dataSample) {
-        predict(inputCanvas)
+        if (dataSample) {
+            predict(inputCanvas)
+        }
     }
 }
 
 const styles = `
   .playground-wrapper {
-    font-family: Helvetica, Arial, sans-serif;
   }
 
   .playground-wrapper h3, .playground-wrapper h4 {
@@ -173,7 +185,7 @@ const styles = `
   }
 
   .playground-container .canvas-container canvas {
-    border: 1px solid rgba(0, 0, 0, .3);
+    border: 1px solid rgba(255, 255, 255, .3);
     cursor: crosshair;
     width: 200px;
     height: 200px;
@@ -181,6 +193,7 @@ const styles = `
 
   .playground-container .button {
     padding: 10px 4px;
+    margin: 10px 0;
     border: 0 none;
     cursor: pointer;
     box-shadow: 0 0 0 rgba(0,0,0, 0);
@@ -190,7 +203,7 @@ const styles = `
   }
 
   .playground-container .button:hover {
-    box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.5);
+    box-shadow: 0px 2px 10px 0px rgba(255,255,255,0.5);
   }
 
   .playground-container .button:active {

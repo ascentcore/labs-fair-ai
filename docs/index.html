@@ -1,3 +1,431 @@
-<div id="playground1"></div>
+<html>
 
-<div id="playground2"></div><script src="runtime.bundle.js"></script><script src="sample1.bundle.js"></script><script src="sample2.bundle.js"></script>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            color: #333;
+
+            margin: 0;
+            min-height: 100%;
+            background-color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            color: #333;
+            font-size: 16px;
+
+        }
+
+        .header {
+            background-color: #000;
+            color: #fff;
+            padding: 200px 50px;
+        }
+
+        .header .title {
+            max-width: 720px;
+            text-align: right;
+        }
+
+        .header .paper-link {
+            text-decoration: none;
+            color: #FFF;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 2px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .img-border {
+            border: 1px solid rgba(0, 0, 0, .1);
+            margin: 20px 0;
+        }
+
+        .wrapper {
+            background-color: #FFF;
+            padding: 20px 0;
+        }
+
+        .wrapper.bg-1 {
+            background-color: #000;
+            color: #FFF;
+        }
+
+        .w-container {
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 720px;
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            -ms-flex: 1;
+            flex: 1;
+        }
+
+
+        .paragraph {
+            margin: 20px 0;
+            text-align: justify;
+            text-justify: inter-word;
+            line-height: 160%;
+            letter-spacing: .25px;
+        }
+
+        .paragraph.scrollable {
+            width: 100%;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, .1);
+            margin-top: 20px;
+        }
+
+        .paragraph .scrollable-content {
+            width: 100%;
+            overflow: auto;
+        }
+
+        .paragraph.scrollable::before {
+            content: "↔ Scroll ↔";
+            position: absolute;
+            top: 0;
+            left: 50%;
+        }
+
+
+        .bg-1 table {
+            color: #FFF;
+        }
+
+        table {
+            margin: 20px 0;
+            width: 100%;
+            border-spacing: 0;
+        }
+
+        table td {
+            padding: 5px;
+            text-align: center;
+        }
+
+        table tr td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        table thead td {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .latex-table {
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+            width: auto;
+            margin: 20px auto;
+        }
+
+        .latex-table td {
+            padding: 10px;
+        }
+
+        .latex-table tr td {
+            border-bottom: 0 none;
+        }
+
+        .latex-table tr.divide td {
+            border-top: 1px solid #000;
+        }
+
+        .latex-table tr.highlight td {
+            background-color: rgba(0, 0, 255, 0.1);
+        }
+
+        .latex-table thead td {
+            border-bottom: 1px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="title">
+            <h1>Using counterfactuals to overcome data bias and
+                increase model fairness</h1>
+            <a class="paper-link"
+                href="https://raw.githubusercontent.com/ascentcore/labs-fair-ai/main/assets/Using_counterfactuals_to_overcome_data_bias_and_increase_model_fairness.pdf">📄
+                Paper</a>
+        </div>
+
+
+    </div>
+    <div class="wrapper">
+        <div class="w-container">
+            <!-- <div id="playground1"></div> -->
+            <div class="paragraph">
+                Data-based decision-making systems are increasingly affecting people’s lives. Such systems decide whose
+                credit loan application is approved, who is invited for a job interview and who is accepted into
+                university.
+                This raises the difficult question of how to design these systems, so that they are compatible with
+                fairness
+                and justice norms. Clearly, this is not simply a technical question - the design of such systems
+                requires an
+                understanding of the social context of these applications and requires us to think about philosophical
+                questions.
+            </div>
+            <div>
+                <img class="img-border" src="assets/images/fair.gif" alt="fair" width="100%">
+            </div>
+
+            <div class="paragraph">
+                Over the past few years, the adoption of AI models has skyrocketed, and more decisions have been taken
+                by
+                such algorithms. Machine learning models provide good prediction results, but the predictions may not be
+                interpretable most of the time. The wide adoption of such models and the decisions that already directly
+                impact our lives and their use have led to rising concerns about the fairness and trustworthiness of
+                such
+                models.
+            </div>
+            <div class="paragraph">
+                In 2018 a study was commissioned by the Council of Europe's Committee of experts on human rights. It was
+                prompted by concerns about the potential adverse consequences of advantages of digital technologies,
+                including AI, within a Human Rights Framework. An important aspect of the study was conducted around the
+                ethics of AI. Ethics in AI represents guarding against certain kinds of discrimination and, if possible,
+                encoding the abstract concept of fairness into the system. Even if we are trying to capture, encode and
+                program such guards into the trained models, other complex data patterns might capture the bias and make
+                it
+                invisible to such guards. A fair dataset will produce fair models, but the machine learning models are
+                only
+                as good as the data they are trained on: ”bias in, bias out”.
+
+            </div>
+        </div>
+    </div>
+    <div class="wrapper bg-1">
+        <div class="w-container">
+            <h3>Counterfactuals in XAI</h3>
+            <div class="paragraph">
+                In the field of XAI, counterfactuals provide interpretations to reveal what changes would be necessary
+                in
+                order to receive the desired prediction, rather than an explanation to understand why the current
+                situation
+                had a certain prediction. Counterfactuals help the user understand what features need to be changed in
+                order
+                to achieve a certain outcome and thus infer which features influence the model the most. Counterfactual
+                instances can be found by iterative perturbing of the input features until the desired prediction or a
+                prediction different than the original outcome is obtained.
+                We focus on searching for a counterfactual solution in the input space to capture an unfair decision on
+                the
+                part of the model and mitigate bias or simply emphasize a wrong decision-making behavior caused by a bad
+                data structure.
+            </div>
+            <div id="playground2"></div>
+
+        </div>
+
+        <div class="w-container">
+            <h3>Counterfactuals in XAI</h3>
+            <div class="paragraph">
+                By using counterfactual explanations we prove and overcome the fragility and bias of a machine learning
+                model. The scope of the research is to reduce the bias toward a specific feature or a set of features in
+                the training dataset to increase the model fairness without altering the correlation value between the
+                rest of the features on the outcome.
+                Counterfactuals can be used as unit tests to measure the fragility of the model. Using the MNIST example
+                a poorly trained model would have a reduced number of changes for a different outcome than the original,
+                as opposed to a model that is trained well that will introduce more noise in the generated image.
+            </div>
+            <!-- <div id="playground1"></div> -->
+            <table>
+                <thead>
+                    <td>Original</td>
+                    <td>Weak Model Counterfactual</td>
+                    <td>Strong Model Counterfactual</td>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <img class="img-border" src="assets/images/three.png" alt="fair" width="100" height="100">
+                        </td>
+                        <td>
+                            <div>Changes: 39</div>
+                            <img class="img-border" src="assets/images/3to8weak.png" alt="fair" width="100" height="100">
+                        </td>
+                        <td>
+                            <div>Changes: 53</div>
+                            <img class="img-border" src="assets/images/3to8strong.png" alt="fair" width="100" height="100">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img class="img-border" src="assets/images/nine.png" alt="fair" width="100" height="100">
+                        </td>
+                        <td>
+                            <div>Changes: 30</div>
+                            <img class="img-border" src="assets/images/9to3weak30.png" alt="fair" width="100" height="100">
+
+                        </td>
+                        <td>
+                            <div>Changes: 36</div>
+                            <img class="img-border" src="assets/images/9to3strong36.png" alt="fair" width="100"
+                                height="100">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="wrapper">
+        <div class="w-container">
+            <h3>Research Scope</h3>
+            <!-- <div id="playground1"></div> -->
+            <div class="paragraph">
+                The scope of this research is to reduce the bias toward a
+                specific feature or a set of features in the training dataset to
+                increase the model fairness without altering the correlation
+                value between the rest of the features on the outcome. The
+                paper focuses on measuring the quality of the generated
+                counterfactuals, their impact on the feature importance / corre-
+                lation, and increasing the model's fairness with each batch of
+                generated counterfactuals
+            </div>
+
+            <div class="paragraph scrollable">
+                <div class="scrollable-content">
+                    <img src="assets/images/adult-income-dataset.png">
+                </div>
+
+            </div>
+
+            <div class="paragraph">
+                The experiment uses a modified Adult dataset where
+                we hand-picked the training data such that the outcome should
+                favor a single gender. Calculating the correlation ma-
+                trix will evidentiate the impact of gender on the salary status
+                column (Fig. 4). The experiment aims to use synthetically
+                generated counterfactuals in the training dataset to reduce the
+                decision bias towards a set of specific features.
+
+                <img src="assets/images/training_dataset.png">
+            </div>
+
+            <div class="paragraph">
+                The proposed method uses an evolutive algorithm (Genetic
+                Algorithm) to generate new potential solutions in the defined
+                searching domain close to the predicted input but generate
+                a different result. The experiment is executed in multiple
+                iterations by trying to generate counterfactuals for a batch of
+                x input data, selecting the generated solutions whose number
+                of changes is less than a threshold, introducing the input data
+                with the counterfactual outcome back into the training dataset,
+                and retraining the model and repeating the experiment with
+                never seen data
+            </div>
+            <h3>Sample Counterfactual</h3>
+            <div class="paragraph">
+                Having the model trained on the proposed original dataset will introduce a heavy decision bias towards a
+                specific gender. By trying to generate the counterfactuals we aim to seek the results that have a
+                different outcome for a small, set by a threhold, amount of changes.
+
+                <table class="latex-table">
+                    <thead>
+                        <td>Feature</td>
+                        <td>Reference</td>
+                        <td>Counterfactual</td>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Age</td>
+                            <td>35</td>
+                            <td>35</td>
+                        </tr>
+                        <tr>
+                            <td>Workclass</td>
+                            <td>Private</td>
+                            <td>Private</td>
+                        </tr>
+                        <tr>
+                            <td>Education</td>
+                            <td>Bachelors</td>
+                            <td>Bachelors</td>
+                        </tr>
+                        <tr>
+                            <td>Education Num</td>
+                            <td>15</td>
+                            <td>15</td>
+                        </tr>
+                        <tr>
+                            <td>Occupation</td>
+                            <td>Sales</td>
+                            <td>Sales</td>
+                        </tr>
+                        <tr>
+                            <td>Race</td>
+                            <td>White</td>
+                            <td>White</td>
+                        </tr>
+                        <tr class="highlight">
+                            <td>Gender</td>
+                            <td>Male</td>
+                            <td>Female</td>
+                        </tr>
+                        <tr>
+                            <td>Hours Per Week</td>
+                            <td>40</td>
+                            <td>40</td>
+                        </tr>
+                        <tr class="divide">
+                            <td>Outcome</td>
+                            <td>&lt;=50k</td>
+                            <td>&gt;50k</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper bg-1">
+        <div class="w-container">
+            <h3>Results</h3>
+            <div class="paragraph">
+                The counterfactuals were generated using seven iterations,
+                each consisting of a batch of 1,000 samples for measurements
+                and counterfactuals. The decrease of accepted solutions with
+                each iteration results from an increase in model
+                robustness and a proof that the generating algorithm finds
+                fewer solutions or the found solutions have too many changes
+                to be accepted. o evaluate the model fairness update, a benchmark dataset
+                was used after each new batch of synthetic data was pushed
+                back into the training dataset, and the model was updated.
+                After each benchmark, we extracted the number of times
+                each feature was changed for both generated and accepted
+                solutions. For the initial iteration, Gender was the primary
+                feature that was changed to generate a potential solution (696
+                potential solutions, 302 passing the threshold). As the model is
+                updated and the fairness is corrected, later iterations observed
+                a decrease in solutions with changes in Gender and mainly
+                focused on other, more relevant to the real-world features, such
+                as Age, Education Num and Hours per Week.
+                <img src="assets/images/accepted_counterfactuals.png">
+            </div>
+            <div class="paragraph">
+                We computed the correlation matrix between each input
+                feature against the output column (Salary Status) to monitor
+                the influence of each feature on the outcome at the training
+                dataset level. As shown in the figure below, the Gender feature influence
+                on the outcome was highly diminished without significantly
+                impacting the rest of the features. There are also other features
+                that capture a personal characteristic, such as race, but since
+                the original training data was not biased toward race, the
+                feature importance of this column was not changed at the
+                end of the iterative process. Also, features that do not contain
+                any personal characteristic (e.g. Occupation, Hours per Week,
+                Education) suffered a minor change at the end of the iterative
+                process thus maintaining the original data characteristics.
+                <img src="assets/images/feature_importance.png" width="100%">
+            </div>
+        </div>
+    </div>
+
+<script src="runtime.bundle.js"></script><script src="sample1.bundle.js"></script><script src="sample2.bundle.js"></script></body>
+
+</html>

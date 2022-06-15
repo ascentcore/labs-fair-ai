@@ -43,7 +43,7 @@ export function prepareCounterfactual(options) {
             doPredictions,
             100,
             90,
-            { single_crossover: true },
+            { single_crossover: false },
             { single_mutation: false, mutation_probability: 0.002 }
         )
 
