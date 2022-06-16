@@ -13,7 +13,6 @@
             font-family: 'DM Sans', sans-serif;
             color: #333;
             font-size: 16px;
-
         }
 
         .header {
@@ -21,6 +20,20 @@
             color: #fff;
             padding: 200px 50px;
             position: relative;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .paragraph, h3 {
+                padding: 0 10px;
+            }
+
+            .playground-container {
+                flex-direction: column;
+            }
+
+            .canvas-container img, .canvas-container canvas {
+                margin: 0 auto;
+            }
         }
 
         .header:before {
@@ -88,19 +101,20 @@
             letter-spacing: .25px;
         }
 
-        .paragraph.scrollable {
+        .scrollable {
             width: 100%;
+            display: block;
             position: relative;
             border: 1px solid rgba(0, 0, 0, .1);
             margin-top: 20px;
         }
 
-        .paragraph .scrollable-content {
+        .scrollable-content {
             width: 100%;
             overflow: auto;
         }
 
-        .paragraph.scrollable::before {
+        .scrollable::before {
             content: "↔ Scroll ↔";
             position: absolute;
             top: 0;
@@ -305,7 +319,7 @@
                 generated counterfactuals
             </div>
 
-            <div class="paragraph scrollable">
+            <div class="scrollable">
                 <div class="scrollable-content">
                     <img src="../assets/adult-income-dataset.png">
                 </div>
@@ -321,7 +335,7 @@
                 generated counterfactuals in the training dataset to reduce the
                 decision bias towards a set of specific features.
 
-                <img src="../assets/training_dataset.png">
+                <img width="100%" src="../assets/training_dataset.png">
             </div>
 
             <div class="paragraph">
@@ -422,7 +436,7 @@
                 a decrease in solutions with changes in Gender and mainly
                 focused on other, more relevant to the real-world features, such
                 as Age, Education Num and Hours per Week.
-                <img src="../assets/accepted_counterfactuals.png">
+                <img width="100%" src="../assets/accepted_counterfactuals.png">
             </div>
             <div class="paragraph">
                 We computed the correlation matrix between each input
@@ -438,7 +452,7 @@
                 any personal characteristic (e.g. Occupation, Hours per Week,
                 Education) suffered a minor change at the end of the iterative
                 process thus maintaining the original data characteristics.
-                <img src="../assets/feature_importance.png" width="100%">
+                <img width="100%" src="../assets/feature_importance.png" width="100%">
             </div>
         </div>
     </div>
